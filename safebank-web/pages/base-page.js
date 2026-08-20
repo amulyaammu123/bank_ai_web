@@ -31,7 +31,11 @@ class BasePage {
     const el = await this.findElement(locator, timeout);
     await this.driver.wait(until.elementIsEnabled(el), timeout);
     logger.info(`Clicking element: ${locator.toString()}`);
-    await el.click();
+    try {
+      await el.click();
+    } catch (e) {
+      await this.driver.executeScript("arguments[0].scrollIntoView({block: 'center'}); arguments[0].click();", el);
+    }
   }
 
   async writeInput(locator, text, timeout = 10000) {

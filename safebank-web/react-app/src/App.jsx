@@ -1485,12 +1485,10 @@ function SmsScannerPage({ currentUserEmail, userToken, lang, highContrast }) {
     const resText = await GeminiService.analyzeText(prompt, null, smsText, lang);
 
     setSmsLoading(false);
-    setSmsResult(resText);
-
-    if (smsText.toLowerCase().includes('blocked') || smsText.toLowerCase().includes('kyc')) {
+    if (smsText.toLowerCase().includes('blocked') || smsText.toLowerCase().includes('kyc') || smsText.toLowerCase().includes('urgent')) {
       setSmsScore('92% Threat Score');
       setSmsResult('URGENT PHISHING ALERT: This message is flagged as risky and contains suspicious bank KYC link patterns.');
-    } else if (smsText.toLowerCase().includes('won') || smsText.toLowerCase().includes('lottery') || smsText.toLowerCase().includes('crore')) {
+    } else if (smsText.toLowerCase().includes('won') || smsText.toLowerCase().includes('lottery') || smsText.toLowerCase().includes('crore') || smsText.toLowerCase().includes('congratulations')) {
       setSmsScore('88% Threat Score');
       setSmsResult('LOTTERY PHISHING SCAM: This message promises fake cash rewards. Flagged as phishing scam!');
     } else {
@@ -2082,19 +2080,27 @@ function ChatbotPage({ currentUserEmail, lang, highContrast }) {
   ]);
   const [loading, setLoading] = useState(false);
 
-  const handleSendMessage = async () => {
-    if (!query.trim()) return;
+  const handleSendMessage = async (textOverride = null) => {
+    const textToSend = textOverride || query;
+    if (!textToSend.trim()) return;
 
-    const userText = query;
     setQuery('');
-    const newMessages = [...messages, { sender: 'user', text: userText }];
+    const newMessages = [...messages, { sender: 'user', text: textToSend }];
     setMessages(newMessages);
     setLoading(true);
 
-    const botReply = await GeminiService.chatResponse(userText, lang);
+    const botReply = await GeminiService.chatResponse(textToSend, lang);
     setLoading(false);
     setMessages([...newMessages, { sender: 'assistant', text: botReply }]);
+    voiceService.speak(botReply.substring(0, 200), lang);
   };
+
+  const suggestionChips = [
+    { labelEn: "Is my OTP safe?", labelTe: "నా OTP సురక్షితమేనా?", labelHi: "क्या मेरा ओटीपी सुरक्षित है?", query: "Is my OTP code or ATM PIN safe to share?" },
+    { labelEn: "What is 1930 Helpline?", labelTe: "1930 సైబర్ హెల్ప్‌లైన్ అంటే ఏమిటి?", labelHi: "1930 हेल्पलाइन क्या है?", query: "What is the 1930 National Cybercrime Helpline?" },
+    { labelEn: "GooglePay QR Scam rules", labelTe: "GooglePay QR మోసం నియమాలు", labelHi: "गूगल पे क्यूआर नियम", query: "Can I receive money by scanning a QR code on GooglePay?" },
+    { labelEn: "Fake Police Call alert", labelTe: "నకిలీ పోలీస్ కాల్ హెచ్చరిక", labelHi: "फर्जी पुलिस कॉल", query: "What should I do if a caller claiming to be police threatens me?" }
+  ];
 
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 180px)' }}>
@@ -2107,13 +2113,13 @@ function ChatbotPage({ currentUserEmail, lang, highContrast }) {
       <div 
         className="glass-panel" 
         data-testid="chat_messages_flow" 
-        style={{ flex: 1, padding: '20px', overflowY: 'auto', marginBottom: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}
+        style={{ flex: 1, padding: '20px', overflowY: 'auto', marginBottom: '12px', display: 'flex', flexDirection: 'column', gap: '12px' }}
       >
         {messages.map((msg, idx) => (
           <div key={idx} style={{ display: 'flex', justifyContent: msg.sender === 'user' ? 'flex-end' : 'flex-start' }}>
             <div 
               style={{
-                maxWidth: '75%',
+                maxWidth: '80%',
                 padding: '12px 16px',
                 borderRadius: '16px',
                 background: msg.sender === 'user' ? (highContrast ? '#333333' : '#C8E6C9') : (highContrast ? '#000000' : '#E2E8F0'),
@@ -2123,8 +2129,13 @@ function ChatbotPage({ currentUserEmail, lang, highContrast }) {
                 fontSize: '0.9rem'
               }}
             >
-              <div style={{ fontSize: '0.75rem', fontWeight: 'bold', marginBottom: '4px', opacity: 0.8 }}>
-                {msg.sender === 'user' ? 'You' : 'SafeBank AI'}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                <span style={{ fontSize: '0.75rem', fontWeight: 'bold', opacity: 0.8 }}>
+                  {msg.sender === 'user' ? 'You' : 'SafeBank AI'}
+                </span>
+                {msg.sender === 'assistant' && (
+                  <VoiceReadButton text={msg.text} lang={lang} size={14} />
+                )}
               </div>
               {msg.text}
             </div>
@@ -2135,6 +2146,21 @@ function ChatbotPage({ currentUserEmail, lang, highContrast }) {
             <RefreshCw className="animate-spin" size={16} /> Thinking safety response...
           </div>
         )}
+      </div>
+
+      {/* Quick Suggestion Chips */}
+      <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '8px', marginBottom: '8px' }}>
+        {suggestionChips.map((chip, idx) => (
+          <button
+            key={idx}
+            type="button"
+            onClick={() => handleSendMessage(chip.query)}
+            className="btn btn-secondary"
+            style={{ padding: '4px 10px', fontSize: '0.75rem', whiteSpace: 'nowrap' }}
+          >
+            💡 {lang === 'te' ? chip.labelTe : lang === 'hi' ? chip.labelHi : chip.labelEn}
+          </button>
+        ))}
       </div>
 
       {/* Input Box */}
@@ -2149,11 +2175,11 @@ function ChatbotPage({ currentUserEmail, lang, highContrast }) {
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
         />
-        <VoiceMicButton onTranscript={(txt) => setQuery(txt)} lang={lang} />
+        <VoiceMicButton onTranscript={(txt) => handleSendMessage(txt)} lang={lang} />
         <button
           id="chat_send_btn"
           data-testid="chat_send_btn"
-          onClick={handleSendMessage}
+          onClick={() => handleSendMessage()}
           className="btn btn-primary"
           style={{ padding: '0 20px' }}
         >
