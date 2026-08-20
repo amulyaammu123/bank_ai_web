@@ -216,6 +216,7 @@ describe('SafeBank AI E2E Test Suite', function() {
     });
 
     it('[TC011] Upload suspicious SMS content', async function() {
+      await performLogin(driver, config.testUser.email, config.testUser.password);
       const smsPage = new SmsScannerPage(driver);
       await smsPage.visit(`${config.baseUrl}/sms-scanner`);
       excelGenerator.addExecutionLog(new Date(), this.test.title, 'Navigated to SMS Scanner page', 'SUCCESS');
@@ -231,6 +232,7 @@ describe('SafeBank AI E2E Test Suite', function() {
     });
 
     it('[TC012] Upload phishing message', async function() {
+      await performLogin(driver, config.testUser.email, config.testUser.password);
       const smsPage = new SmsScannerPage(driver);
       await smsPage.visit(`${config.baseUrl}/sms-scanner`);
       excelGenerator.addExecutionLog(new Date(), this.test.title, 'Navigated to SMS Scanner page', 'SUCCESS');
@@ -245,6 +247,7 @@ describe('SafeBank AI E2E Test Suite', function() {
     });
 
     it('[TC013] Upload safe banking message', async function() {
+      await performLogin(driver, config.testUser.email, config.testUser.password);
       const smsPage = new SmsScannerPage(driver);
       await smsPage.visit(`${config.baseUrl}/sms-scanner`);
       excelGenerator.addExecutionLog(new Date(), this.test.title, 'Navigated to SMS Scanner page', 'SUCCESS');
