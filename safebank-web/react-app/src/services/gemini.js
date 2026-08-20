@@ -177,6 +177,17 @@ export function getOfflineSafetyPrediction(text, lang = "en") {
   const cleanNum = text.replace(/ /g, "").replace(/-/g, "").replace(/\+/g, "");
   const isBlacklisted = BLACKLISTED_NUMBERS.some(num => cleanNum.includes(num));
 
+  // Comprehensive Fraud Keyword Checks
+  const isOtpScam = lower.includes("otp") || lower.includes("passcode") || lower.includes("pin") || lower.includes("cvv");
+  const isKycScam = lower.includes("kyc") || lower.includes("aadhaar") || lower.includes("pan") || lower.includes("block") || lower.includes("suspend") || lower.includes("deactivate");
+  const isLotteryScam = lower.includes("won") || lower.includes("lottery") || lower.includes("prize") || lower.includes("reward") || lower.includes("crore") || lower.includes("lakh") || lower.includes("winner") || lower.includes("gift");
+  const isPhishingLink = lower.includes("http") || lower.includes("link") || lower.includes("click") || lower.includes(".com") || lower.includes(".in") || lower.includes("bit.ly");
+  const isFearPoliceScam = lower.includes("police") || lower.includes("cbi") || lower.includes("court") || lower.includes("arrest") || lower.includes("legal") || lower.includes("warrant");
+  const isUtilityScam = lower.includes("electricity") || lower.includes("power") || lower.includes("bill") || lower.includes("recharge");
+  const isJobRefundScam = lower.includes("job") || lower.includes("refund") || lower.includes("cashback") || lower.includes("part time") || lower.includes("salary");
+
+  const isFraudMessage = isOtpScam || isKycScam || isLotteryScam || isPhishingLink || isFearPoliceScam || isUtilityScam || isJobRefundScam;
+
   switch (lang) {
     case "te":
       if (isNumberOnly && text.trim().length >= 5) {
@@ -190,15 +201,20 @@ export function getOfflineSafetyPrediction(text, lang = "en") {
                  "సలహా: సాధారణ కాల్. సాధారణ జాగ్రత్తలతో మాట్లాడవచ్చు.";
         }
       }
-      if (lower.includes("otp") || lower.includes("passcode")) {
+      if (isOtpScam) {
         return "రిస్క్ లెవల్: అత్యంత ప్రమాదకరం (OTP మోసం 98%)\n" +
                "కారణం: బ్యాంకులు ఎప్పుడూ ఫోన్ లో OTP అడగవు. ఇది మీ ఖాతా ఖాళీ చేసే ప్రయత్నం.\n" +
                "సలహా: ఈ సందేశాన్ని పట్టించుకోకండి మరియు ఎవరికీ OTP చెప్పకండి.";
       }
-      if (lower.includes("kyc") || lower.includes("aadhaar") || lower.includes("block")) {
+      if (isKycScam || isPhishingLink) {
         return "రిస్క్ లెవల్: ప్రమాదకరం (KYC మోసం 95%)\n" +
                "కారణం: ఖాతా బ్లాక్ అవుతుందని భయపెట్టడం మోసగాళ్ల పద్ధతి.\n" +
                "సలహా: వెంటనే మీ బ్యాంక్ బ్రాంచ్ ని సంప్రదించండి, లింకులు నొక్కకండి.";
+      }
+      if (isFraudMessage) {
+        return "రిస్క్ లెవల్: మోసపూరిత హెచ్చరిక (స్కామ్ ముప్పు 90%)\n" +
+               "కారణం: ఈ సందేశంలో బహుమతులు, లింక్‌లు లేదా నకిలీ బ్యాంక్ వార్తలు ఉన్నాయి.\n" +
+               "సలహా: ఎటువంటి లింక్‌లను క్లిక్ చేయవద్దు లేదా డబ్బులు పంపవద్దు.";
       }
       return "రిస్క్ లెవల్: సురక్షితం (తక్కువ ముప్పు 15%)\n" +
              "కారణం: ఎటువంటి ప్రమాదకర పదాలు కనుగొనబడలేదు.\n" +
@@ -216,15 +232,20 @@ export function getOfflineSafetyPrediction(text, lang = "en") {
                  "सलाह: सामान्य कॉल। सामान्य सावधानियों के साथ बातचीत सुरक्षित है।";
         }
       }
-      if (lower.includes("otp") || lower.includes("passcode")) {
+      if (isOtpScam) {
         return "जोखिम स्तर: अत्यंत खतरनाक (ओटीपी घोटाला 98%)\n" +
                "कारण: बैंक कभी भी फोन पर ओटीपी नहीं मांगते। यह आपके खाते को खाली करने का प्रयास है।\n" +
                "सलाह: इस संदेश को अनदेखा करें और किसी को ओटीपी न बताएं।";
       }
-      if (lower.includes("kyc") || lower.includes("aadhaar") || lower.includes("block")) {
+      if (isKycScam || isPhishingLink) {
         return "जोखिम स्तर: खतरनाक (केवाईसी धोखाधड़ी 95%)\n" +
                "कारण: खाता ब्लॉक होने का डर दिखाकर धोखाधड़ी की जाती है।\n" +
                "सलाह: अपनी बैंक शाखा से संपर्क करें, किसी भी लिंक पर क्लिक न करें।";
+      }
+      if (isFraudMessage) {
+        return "जोखिम स्तर: धोखाधड़ी की चेतावनी (स्कैम खतरा 90%)\n" +
+               "कारण: इस संदेश में संदिग्ध पुरस्कार, लिंक या फर्जी ऑफ़र पाए गए हैं।\n" +
+               "सलाह: किसी भी लिंक पर क्लिक न करें या पैसे ट्रांसफर न करें।";
       }
       return "जोखिम स्तर: सुरक्षित (कम खतरा 15%)\n" +
              "कारण: कोई स्पष्ट खतरा नहीं पाया गया।\n" +
@@ -242,15 +263,20 @@ export function getOfflineSafetyPrediction(text, lang = "en") {
                  "ஆலோசனை: சாதாரண அழைப்பு. வழக்கமான எச்சரிக்கையுடன் பேசலாம்.";
         }
       }
-      if (lower.includes("otp") || lower.includes("passcode")) {
+      if (isOtpScam) {
         return "அபாய நிலை: மிகவும் ஆபத்தானது (OTP மோசடி 98%)\n" +
                "காரணம்: வங்கிகள் ஒருபோதும் போனில் OTP கேட்காது. இது உங்கள் பணத்தைத் திருடும் முயற்சி.\n" +
                "ஆலோசனை: இந்த செய்தியை புறக்கணிக்கவும், யாருக்கும் OTP சொல்ல வேண்டாம்.";
       }
-      if (lower.includes("kyc") || lower.includes("aadhaar") || lower.includes("block")) {
+      if (isKycScam || isPhishingLink) {
         return "அபாய நிலை: ஆபத்தானது (KYC மோசடி 95%)\n" +
                "காரணம்: கணக்கு முடக்கப்படும் என்று பயமுறுத்துவது மோசடி செய்பவர்களின் முறை.\n" +
                "ஆலோசனை: உங்கள் வங்கி கிளையை அணுகவும், லிங்க்களை கிளிக் செய்யாதீர்கள்.";
+      }
+      if (isFraudMessage) {
+        return "அபாய நிலை: மோசடி எச்சரிக்கை (மோசடி ஆபத்து 90%)\n" +
+               "காரணம்: இந்த செய்தியில் சந்தேகத்திற்குரிய லிங்க் அல்லது போலி வாக்குறுதி உள்ளது.\n" +
+               "ஆலோசனை: லிங்க்களை கிளிக் செய்ய வேண்டாம்.";
       }
       return "அபாய நிலை: பாதுகாப்பானது (குறைந்த அபாயம் 15%)\n" +
              "காரணம்: ஆபத்தான வார்த்தைகள் எதுவும் கண்டறியப்படவில்லை.\n" +
@@ -268,15 +294,25 @@ export function getOfflineSafetyPrediction(text, lang = "en") {
                  "Advice: Standard safe contact. Safe to interact under normal precautions.";
         }
       }
-      if (lower.includes("otp") || lower.includes("passcode")) {
-        return "RISK LEVEL: SECURE FRAUD WARNING (OTP Scam Risk 98%)\n" +
-               "Reason: Banks never ask for OTPs over call or SMS. This is a direct theft attempt.\n" +
-               "Advice: Ignore this message and never reveal your digits.";
+      if (isOtpScam) {
+        return "RISK LEVEL: CRITICAL FRAUD WARNING (OTP Scam Risk 98%)\n" +
+               "Reason: Banks never ask for OTPs or PINs over call or SMS. This is a direct theft attempt.\n" +
+               "Advice: Ignore this message and never reveal your confidential digits.";
       }
-      if (lower.includes("kyc") || lower.includes("aadhaar") || lower.includes("block")) {
-        return "RISK LEVEL: HIGH FRAUD WARNING (KYC Suspension Phishing 95%)\n" +
-               "Reason: Warning about account blocks is a psychological scam to induce panic.\n" +
-               "Advice: Call your bank manager directly or visit branch.";
+      if (isKycScam || isPhishingLink) {
+        return "RISK LEVEL: HIGH FRAUD WARNING (KYC Phishing Scam 95%)\n" +
+               "Reason: Urgency warnings about account suspension or suspicious links are psychological scams.\n" +
+               "Advice: Never click external links. Visit your nearest official bank branch directly.";
+      }
+      if (isLotteryScam) {
+        return "RISK LEVEL: HIGH FRAUD WARNING (Lottery / Prize Scam 92%)\n" +
+               "Reason: Unsolicited reward offers demanding advance fees or QR code scans are fraudulent.\n" +
+               "Advice: Block sender immediately. Do not transfer any processing fees.";
+      }
+      if (isFraudMessage) {
+        return "RISK LEVEL: FRAUD WARNING (Suspicious Scam Pattern 90%)\n" +
+               "Reason: Text contains suspicious financial keywords, unverified urgency, or phishing links.\n" +
+               "Advice: Do not respond or share credentials. Verify directly with official customer care.";
       }
       return "RISK LEVEL: SECURE / LOW THREAT (Low Risk 15%)\n" +
              "Reason: No obvious phishing keywords matched. Stay alert.\n" +
