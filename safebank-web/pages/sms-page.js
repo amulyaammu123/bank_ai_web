@@ -21,13 +21,27 @@ class SmsScannerPage extends BasePage {
     this.urlScanResult = By.id('url-scan-result');
   }
 
+  async ensureLoggedIn() {
+    try {
+      const currentUrl = await this.driver.getCurrentUrl();
+      if (currentUrl.includes('/login')) {
+        const LoginPage = require('./login-page');
+        const loginPage = new LoginPage(this.driver);
+        await loginPage.login('user@safebank.ai', 'Password123');
+        await this.driver.sleep(500);
+      }
+    } catch (e) {}
+  }
+
   async scanSms(message) {
+    await this.ensureLoggedIn();
     await this.click(this.tabSmsScan);
     if (message !== null) await this.writeInput(this.smsInput, message);
     await this.click(this.smsScanBtn);
   }
 
   async scanUrl(url) {
+    await this.ensureLoggedIn();
     await this.click(this.tabUrlScan);
     if (url !== null) await this.writeInput(this.urlInput, url);
     await this.click(this.urlScanBtn);

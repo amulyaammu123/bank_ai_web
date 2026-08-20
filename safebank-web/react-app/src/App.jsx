@@ -222,11 +222,10 @@ export default function App() {
     await SupabaseService.signUp(email, password);
 
     const users = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
-    if (users.some(u => u.email === email)) {
-      return { success: false, message: 'Email already exists' };
+    if (!users.some(u => u.email === email)) {
+      users.push({ name, email, password });
+      localStorage.setItem('registeredUsers', JSON.stringify(users));
     }
-    users.push({ name, email, password });
-    localStorage.setItem('registeredUsers', JSON.stringify(users));
     
     setIsAuthenticated(true);
     setCurrentUserEmail(email);
