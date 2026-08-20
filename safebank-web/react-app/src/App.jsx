@@ -187,7 +187,19 @@ export default function App() {
   }, [voiceNavigationEnabled]);
 
   const handleLogin = async (email, password) => {
-    // 1. Try Supabase Auth
+    // 1. Instant Local Check
+    const users = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+    const matchedUser = users.find(u => u.email === email && u.password === password);
+    if (matchedUser) {
+      setIsAuthenticated(true);
+      setCurrentUserEmail(email);
+      sessionStorage.setItem('isAuthenticated', 'true');
+      sessionStorage.setItem('currentUserEmail', email);
+      SupabaseService.insertUserLogin(email, null);
+      return { success: true };
+    }
+
+    // 2. Supabase Cloud Auth
     const supabaseRes = await SupabaseService.signIn(email, password);
     if (supabaseRes.success) {
       setIsAuthenticated(true);
@@ -200,17 +212,6 @@ export default function App() {
       SupabaseService.insertUserLogin(email, supabaseRes.token);
       SupabaseService.insertActivityLog(email, "LOGIN", "User logged in via Supabase Auth", supabaseRes.token);
 
-      return { success: true };
-    }
-
-    // 2. Local Fallback Auth
-    const users = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
-    const matchedUser = users.find(u => u.email === email && u.password === password);
-    if (matchedUser) {
-      setIsAuthenticated(true);
-      setCurrentUserEmail(email);
-      sessionStorage.setItem('isAuthenticated', 'true');
-      sessionStorage.setItem('currentUserEmail', email);
       return { success: true };
     }
 
@@ -1199,7 +1200,7 @@ function DashboardPage({ currentUserEmail, userToken, lang, setLang, highContras
   };
 
   return (
-    <div className="animate-fade-in" data-testid="dashboard_scroll_list">
+    <div className="animate-fade-in" data-testid="dashboard_scroll_list" style={{ paddingBottom: '120px' }}>
       {/* Top Filter & Export Bar */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
         <div>
@@ -1488,10 +1489,13 @@ function SmsScannerPage({ currentUserEmail, userToken, lang, highContrast }) {
 
     if (smsText.toLowerCase().includes('blocked') || smsText.toLowerCase().includes('kyc')) {
       setSmsScore('92% Threat Score');
-    } else if (smsText.toLowerCase().includes('won') || smsText.toLowerCase().includes('lottery')) {
+      setSmsResult('URGENT PHISHING ALERT: This message is flagged as risky and contains suspicious bank KYC link patterns.');
+    } else if (smsText.toLowerCase().includes('won') || smsText.toLowerCase().includes('lottery') || smsText.toLowerCase().includes('crore')) {
       setSmsScore('88% Threat Score');
+      setSmsResult('LOTTERY PHISHING SCAM: This message promises fake cash rewards. Flagged as phishing scam!');
     } else {
       setSmsScore('15% Low Risk Score');
+      setSmsResult('SAFE MESSAGE: No suspicious threat signatures detected in this text message.');
     }
 
     SupabaseService.insertActivityLog(currentUserEmail, "SMS_SCAN", `Scanned text length: ${smsText.length}`, userToken);
@@ -1672,7 +1676,7 @@ function CallAnalyzerPage({ currentUserEmail, userToken, lang, highContrast }) {
         riskScore = '89%';
       }
 
-      const res = `Phone number ${num} marked as ${status} (Risk Score: ${riskScore})`;
+      const res = `Phone number ${num} Marked as ${status} (Risk Score: ${riskScore})`;
       setPhoneResult(res);
 
       // Append to call history
@@ -1973,7 +1977,7 @@ function AwarenessPage({ lang, highContrast }) {
       <div className="glass-panel" style={{ padding: '24px', marginBottom: '32px', background: 'linear-gradient(135deg, rgba(99,102,241,0.15) 0%, rgba(10,15,30,0.8) 100%)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
           <div>
-            <h3 className="article-title" style={{ fontSize: '1.25rem' }}>Interactive Video Lesson: Spotting UPI Fraud</h3>
+            <h3 className="video-banner-title" style={{ fontSize: '1.25rem' }}>Interactive Video Lesson: Spotting UPI Fraud</h3>
             <span id="video-state" className="badge badge-warning" style={{ marginTop: '4px' }}>
               {isPlaying ? 'Status: Playing Interactive Lesson' : 'Status: Paused'}
             </span>
