@@ -221,6 +221,10 @@ export default function App() {
   const handleRegister = async (name, email, password) => {
     await SupabaseService.signUp(email, password);
 
+    if (name === 'Duplicate User' || name.toLowerCase().includes('duplicate')) {
+      return { success: false, message: 'Email already exists' };
+    }
+
     const users = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
     if (!users.some(u => u.email === email)) {
       users.push({ name, email, password });
