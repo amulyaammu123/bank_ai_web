@@ -88,49 +88,35 @@ export const GeminiService = {
 export function getAIChatAssistantResponse(text, lang = "en") {
   const lower = text.toLowerCase().trim();
 
-  // Greetings
-  if (lower.includes("hello") || lower.includes("hi") || lower.includes("hey") || lower.includes("namaste") || lower.includes("namaskar") || lower.includes("హలో") || lower.includes("నమస్కారం")) {
+  // 1. OTP / PIN / Passcode / 6-Digit Code queries (HIGHEST PRIORITY)
+  if (lower.includes("otp") || lower.includes("pin") || lower.includes("passcode") || lower.includes("cvv") || lower.includes("password") || /\b\d{4,6}\b/.test(lower)) {
     switch (lang) {
       case "te":
-        return "నమస్కారం! నేను మీ సేఫ్‌బ్యాంక్ కృత్రిమ మేధస్సు భద్రతా సహాయకుడిని (SafeBank AI Assistant). మీ బ్యాంక్ ఖాతా భద్రత, OTP సందేహాలు లేదా సందేహాస్పద మెసేజ్ల వివరాలను స్పష్టం చేయడానికి నేను ఇక్కడ ఉన్నాను. ఈరోజు మీకు ఎలా సహాయపడగలను?";
+        return "⚠️ అత్యంత ముఖ్యం - OTP ఎవరికీ చెప్పకూడదు:\n• మీ 6-అంకెల OTP లేదా PIN కోడ్‌ను ఎవరితోనూ పంచుకోకండి!\n• బ్యాంక్ మేనేజర్లు, సైబర్ పోలీసులు లేదా డిజిటల్ అధికారుల పేరుతో OTP అడిగితే అది 100% మోసపూరిత కాల్.\n• మీ OTP ని రహస్యంగా ఉంచినంత వరకు మీ ఖాతాలోని డబ్బు సురక్షితంగా ఉంటుంది.";
       case "hi":
-        return "नमस्ते! मैं आपका सेफबैंक एआई सुरक्षा सहायक हूँ। मैं आपके बैंक खाते की सुरक्षा, ओटीपी संदेह और संदिग्ध संदेशों की जांच में मदद करने के लिए यहाँ हूँ। आज मैं आपकी क्या सहायता कर सकता हूँ?";
+        return "⚠️ अत्यंत महत्वपूर्ण - ओटीपी कभी साझा न करें:\n• अपना 6-अंकों का ओटीपी या एटीएम पिन कभी किसी के साथ साझा न करें!\n• यदि कोई बैंक मैनेजर या पुलिस बनकर ओटीपी मांगता है, तो वह 100% धोखाधड़ी है।\n• ओटीपी गुप्त रखने से आपका बैंक खाता पूरी तरह सुरक्षित रहेगा।";
       case "ta":
-        return "வணக்கம்! நான் உங்கள் சேஃப்பேங்க் AI பாதுகாப்பு உதவியாளர். உங்கள் வங்கி கணக்கு பாதுகாப்பு, OTP சந்தேகங்கள் மற்றும் சந்தேகத்திற்குரிய தகவல்களை சரிபார்க்க நான் தயார். இன்று உங்களுக்கு எவ்வாறு உதவட்டும்?";
+        return "⚠️ மிகவும் முக்கியம் - OTP யாருக்கும் சொல்லக்கூடாது:\n• உங்களது 6-இலக்க OTP அல்லது PIN எண்களை யாருடனும் பகிர வேண்டாம்!\n• வங்கி மேலாளர் அல்லது காவல்துறை என கூறி OTP கேட்டால் அது 100% போலி மோசடி அழைப்பு.";
       default:
-        return "Hello! I am your SafeBank AI Security Assistant. I am here to help protect your bank account, verify suspicious messages or calls, and answer any digital banking safety questions. How can I assist you today?";
+        return "⚠️ CRITICAL SAFETY WARNING - DO NOT SHARE THIS OTP!\n• An OTP (One-Time Password) or PIN is NEVER safe to share with anyone.\n• If any caller or message asks for your 6-digit OTP code, it is a 100% FRAUD ATTEMPT to steal money from your account.\n• Legitimate banks will NEVER ask for your OTP or PIN over phone, text, or chat!";
     }
   }
 
-  // OTP / PIN / Password queries
-  if (lower.includes("otp") || lower.includes("pin") || lower.includes("passcode") || lower.includes("cvv") || lower.includes("password")) {
-    switch (lang) {
-      case "te":
-        return "⚠️ అత్యంత ముఖ్యం:\n• OTP (వన్-టైమ్ పాస్‌వర్డ్) లేదా ATM PIN అనేది మీ వ్యక్తిగత రహస్య భద్రతా కోడ్.\n• బ్యాంక్ మేనేజర్, పోలీస్ అధికారి అని చెప్పే ఎవరితోనూ మీ OTP ని ఎప్పుడూ పంచుకోకండి.\n• నిజమైన బ్యాంకులు ఫోన్ కాల్ లేదా SMS ద్వారా మీ OTP ని ఎప్పుడూ అడగవు!";
-      case "hi":
-        return "⚠️ अत्यंत महत्वपूर्ण:\n• ओटीपी या एटीएम पिन आपका व्यक्तिगत सुरक्षा कोड है।\n• बैंक मैनेजर या पुलिस अधिकारी होने का दावा करने वाले किसी भी व्यक्ति के साथ अपना ओटीपी कभी साझा न करें।\n• असली बैंक कभी भी फोन पर ओटीपी नहीं मांगते!";
-      case "ta":
-        return "⚠️ மிகவும் முக்கியம்:\n• OTP அல்லது ATM PIN என்பது உங்களது ரகசிய பாதுகாப்பு குறியீடு.\n• வங்கி மேலாளர் என கூறுபவரிடம் கூட உங்களது OTP எண்களை பகிர வேண்டாம்.\n• வங்கிகள் ஒருபோதும் போனில் OTP கேட்காது!";
-      default:
-        return "⚠️ CRITICAL SAFETY RULE:\n• An OTP (One-Time Password) or PIN is your private security key.\n• NEVER share your OTP or PIN with anyone—even callers claiming to be bank managers, RBI officials, or police.\n• Legitimate banks will NEVER call or text asking for your OTP or passwords!";
-    }
-  }
-
-  // GooglePay / PhonePe / UPI Security
+  // 2. GooglePay / PhonePe / UPI Security
   if (lower.includes("googlepay") || lower.includes("gpay") || lower.includes("phonepe") || lower.includes("upi") || lower.includes("qr")) {
     switch (lang) {
       case "te":
-        return "💡 UPI & GooglePay భద్రతా చిట్కాలు:\n1. గుర్తుంచుకోండి: మీ UPI PIN కేవలం డబ్బు పంపడానికి మాత్రమే, డబ్బు పొందడానికి PIN అవసరం లేదు!\n2. బహుమతులు లేదా క్యాష్‌బ్యాక్ పేరుతో వచ్చే తెలియని QR కోడ్‌లను ఎప్పుడూ నొక్కకండి.\n3. మీ ఫోన్ స్క్రీన్ లాక్ మరియు UPI PIN ని ఎవరికీ తెలియకుండా ఉంచండి.";
+        return "💡 UPI & GooglePay భద్రతా నియమాలు:\n1. గుర్తుంచుకోండి: మీ UPI PIN కేవలం డబ్బు పంపడానికి మాత్రమే, డబ్బు పొందడానికి PIN అవసరం లేదు!\n2. తెలియని వారి QR కోడ్‌లను ఎప్పుడూ స్కాన్ చేయకండి.";
       case "hi":
-        return "💡 यूपीआई और गूगल पे सुरक्षा सुझाव:\n1. याद रखें: यूपीआई पिन केवल पैसे भेजने के लिए दर्ज किया जाता है, प्राप्त करने के लिए कभी नहीं!\n2. पुरस्कार या कैशबैक के वादे वाले अज्ञात क्यूआर कोड को स्कैन न करें।\n3. अपना फोन लॉक और यूपीआई पिन गुप्त रखें।";
+        return "💡 यूपीआई और गूगल पे सुरक्षा नियम:\n1. याद रखें: यूपीआई पिन केवल पैसे भेजने के लिए दर्ज किया जाता है, प्राप्त करने के लिए कभी नहीं!\n2. अज्ञात क्यूआर कोड को स्कैन न करें।";
       case "ta":
-        return "💡 GooglePay & UPI பாதுகாப்பு வழிகாட்டுதல்:\n1. நினைவில் வையுங்கள்: பணம் அனுப்ப மட்டுமே UPI PIN தேவை, பணம் பெற PIN தேவை இல்லை!\n2. தெரியாத நபர்களின் QR கோடுகளை ஸ்கேன் செய்யாதீர்கள்.";
+        return "💡 GooglePay & UPI பாதுகாப்பு வழிகாட்டுதல்:\n1. நினைவில் வையுங்கள்: பணம் அனுப்ப மட்டுமே UPI PIN தேவை, பணம் பெற PIN தேவை இல்லை!";
       default:
         return "💡 GooglePay / PhonePe & UPI Safety Rules:\n1. GOLDEN RULE: You enter your UPI PIN ONLY to SEND money, NEVER to receive money!\n2. Never scan unknown QR codes sent by strangers promising rewards or cashbacks.\n3. Keep your phone screen lock and UPI PIN strictly confidential.";
     }
   }
 
-  // National Cybercrime Helpline 1930
+  // 3. National Cybercrime Helpline 1930 & Complaints
   if (lower.includes("1930") || lower.includes("cybercrime") || lower.includes("helpline") || lower.includes("complaint") || lower.includes("report")) {
     switch (lang) {
       case "te":
@@ -144,7 +130,7 @@ export function getAIChatAssistantResponse(text, lang = "en") {
     }
   }
 
-  // Bank Manager / PIN Questions
+  // 4. Bank Manager / Police / CBI Threat Questions
   if (lower.includes("manager") || lower.includes("bank") || lower.includes("police") || lower.includes("cbi") || lower.includes("arrest")) {
     switch (lang) {
       case "te":
@@ -155,6 +141,20 @@ export function getAIChatAssistantResponse(text, lang = "en") {
         return "🛡️ பாதுகாப்பு எச்சரிக்கை:\n• வங்கி ஊழியர்கள் அல்லது காவல்துறை ஒருபோதும் உங்கள் PIN அல்லது கடவுச்சொல்லை கேட்க மாட்டார்கள்.";
       default:
         return "🛡️ Cyber Defense Notice:\n• Real bank staff and police officers will NEVER ask for your password, ATM PIN, UPI PIN, or request money transfers to 'safe accounts'.\n• If a caller threatens you with 'digital arrest' or account block, hang up immediately and report to 1930.";
+    }
+  }
+
+  // 5. Strict Word Boundary Greetings Match (Prevents "this" matching "hi")
+  if (/\b(hi|hello|hey|namaste|namaskar)\b/i.test(lower) || lower.includes("హలో") || lower.includes("నమస్కారం")) {
+    switch (lang) {
+      case "te":
+        return "నమస్కారం! నేను మీ సేఫ్‌బ్యాంక్ కృత్రిమ మేధస్సు భద్రతా సహాయకుడిని (SafeBank AI Assistant). మీ బ్యాంక్ ఖాతా భద్రత, OTP సందేహాలు లేదా సందేహాస్పద మెసేజ్ల వివరాలను స్పష్టం చేయడానికి నేను ఇక్కడ ఉన్నాను. ఈరోజు మీకు ఎలా సహాయపడగలను?";
+      case "hi":
+        return "नमस्ते! मैं आपका सेफबैंक एआई सुरक्षा सहायक हूँ। मैं आपके बैंक खाते की सुरक्षा, ओटीपी संदेह और संदिग्ध संदेशों की जांच में मदद करने के लिए यहाँ हूँ। आज मैं आपकी क्या सहायता कर सकता हूँ?";
+      case "ta":
+        return "வணக்கம்! நான் உங்கள் சேஃப்பேங்க் AI பாதுகாப்பு உதவியாளர். உங்கள் வங்கி கணக்கு பாதுகாப்பு, OTP சந்தேகங்கள் மற்றும் சந்தேகத்திற்குரிய தகவல்களை சரிபார்க்க நான் தயார். இன்று உங்களுக்கு எவ்வாறு உதவட்டும்?";
+      default:
+        return "Hello! I am your SafeBank AI Security Assistant. I am here to help protect your bank account, verify suspicious messages or calls, and answer any digital banking safety questions. How can I assist you today?";
     }
   }
 
