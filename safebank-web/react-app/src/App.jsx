@@ -187,6 +187,16 @@ export default function App() {
   }, [voiceNavigationEnabled]);
 
   const handleLogin = async (email, password) => {
+    // 0. Demo Credentials Check
+    if (email === 'user@safebank.ai' && (password === 'Password123' || password === 'password')) {
+      setIsAuthenticated(true);
+      setCurrentUserEmail(email);
+      sessionStorage.setItem('isAuthenticated', 'true');
+      sessionStorage.setItem('currentUserEmail', email);
+      SupabaseService.insertUserLogin(email, null);
+      return { success: true };
+    }
+
     // 1. Instant Local Check
     const users = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
     const matchedUser = users.find(u => u.email === email && u.password === password);
